@@ -10,52 +10,54 @@ pipeline {
     ]
     ) {
         node('mypod') {
-            stage('Check running containers') {
-                container('docker') {
-                    // example to show you can run docker commands when you mount the socket
-                    sh 'hostname'
-                    sh 'docker images'
+            stages {
+                stage('Check running containers') {
+                    container('docker') {
+                        // example to show you can run docker commands when you mount the socket
+                        sh 'hostname'
+                        sh 'docker images'
+                    }
                 }
-            }
 
-            //stage("Checkout code") {
-            //    container('git') {
-            //        checkout scm
-            //    }
-            //}
+                //stage("Checkout code") {
+                //    container('git') {
+                //        checkout scm
+                //    }
+                //}
 
-            stage('Clone repository') {
-                container('git') {
-                    sh 'git clone -b master https://github.com/aviralharsh/website.git'
+                stage('Clone repository') {
+                    container('git') {
+                        sh 'git clone -b master https://github.com/aviralharsh/website.git'
+                    }
                 }
-            }
 
-            //stage('Maven Build') {
-            //    container('maven') {
-            //        dir('website/') {
-            //            sh 'hostname'
-            //            sh 'mvn clean install'
-            //        }
-            //    }
-            //}
+                //stage('Maven Build') {
+                //    container('maven') {
+                //        dir('website/') {
+                //            sh 'hostname'
+                //            sh 'mvn clean install'
+                //        }
+                //    }
+                //}
 
-            //build image
+                //build image
 
-            stage("Build Image")
-            {
-                container('docker'){
-                        checkout scm
-                        //sh 'git clone -b master https://github.com/aviralharsh/website.git'
-                        website = docker.build("aviralharsh05/website")
+                stage("Build Image")
+                {
+                    container('docker'){
+                            checkout scm
+                            //sh 'git clone -b master https://github.com/aviralharsh/website.git'
+                            website = docker.build("aviralharsh05/website")
+                    }
                 }
-            }
 
-            stage("Push image") {
-                container('docker') {
-                    script {
-                        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-                                website.push("${env.BUILD_NUMBER}")
-                                website.push("1.0.0")
+                stage("Push image") {
+                    container('docker') {
+                        script {
+                            docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+                                    website.push("${env.BUILD_NUMBER}")
+                                    website.push("1.0.0")
+                            }
                         }
                     }
                 }
